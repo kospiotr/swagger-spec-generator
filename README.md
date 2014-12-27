@@ -39,12 +39,14 @@ grunt.initConfig({
 
 #### options.dest
 Type: `String`
+
 Default value: `'spec.json'`
 
 Target spec file.
 
 #### options.paths
 Type: `String / Array`
+
 Default value: `null`
 
 File paths to files containing modules which will be included into `paths` section of the specification.
@@ -52,6 +54,7 @@ For example: `paths: './test/fixtures/**/*Path.js'`
 
 #### options.definitions
 Type: `String / Array`
+
 Default value: `null`
 
 File paths to files containing modules which will be included into `definitions` section of the specification.
@@ -59,6 +62,7 @@ For example: `definitions: './test/fixtures/**/*Def.js'
 
 #### options.override
 Type: `Object`
+
 Default value: `null`
 
 Any overrides which will be applied after importing sections from file.
