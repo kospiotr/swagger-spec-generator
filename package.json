@@ -39,6 +39,8 @@
     "gruntplugin"
   ],
   "dependencies": {
-    "lodash-node": "^2.4.1"
+    "lodash-node": "^2.4.1",
+    "swagger-schema-official": "^2.0.0-a33091a",
+    "z-schema": "^3.3.1"
   }
 }

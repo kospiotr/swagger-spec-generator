@@ -92,6 +92,12 @@ Default value: `2`
 
 Space for pretty format of generated file.
 
+#### options.validate
+Type: `Boolean`
+Default value: `true`
+
+Should validate specs against schema after generating it.
+
 ### Usage Examples
 
 Models are stored in files which ends with `Def`.

@@ -9,8 +9,9 @@
 var path = require('path');
 var fs = require('fs');
 var cwd = process.cwd();
-
+var ZSchema = require("z-schema");
 var _ = require('lodash-node');
+var validate = require('json-schema/lib/validate').validate;
 
 'use strict';
 
@@ -44,12 +45,13 @@ module.exports = function (grunt) {
         var sectionValue = {};
         var files = grunt.file.expand(definitionsPaths);
         files.forEach(function (elem) {
+            grunt.log.debug('Importing %j from file: %j', section, elem);
             var module = readModule(elem);
             sectionValue = _.merge(sectionValue, module);
         });
         out[section] = sectionValue;
     }
-    
+
     function readModule(filePath) {
         var packageJsonPath = path.join(cwd, filePath);
         if (fs.existsSync(packageJsonPath)) {
@@ -59,14 +61,33 @@ module.exports = function (grunt) {
         return {};
     }
 
+    function validateSchema(src) {
+        grunt.log.debug('Validating spec against schema');
+        var jsonSchema = grunt.file.readJSON('schema');
+        var specSchema = grunt.file.readJSON('node_modules/swagger-schema-official/schema.json');
+        var spec = grunt.file.readJSON(src);
+        var validator = new ZSchema();
+        validator.setRemoteReference("http://json-schema.org/draft-04/schema", jsonSchema);
+        
+        var valid = validator.validate(spec, specSchema);
+        grunt.log.debug('Is schema valid: %j', valid);
+        var err = validator.getLastErrors();
+        _.forEach(err, function (elem) {
+            grunt.log.debug('Error: %j', elem);
+        });
+        
+        if(err){
+            grunt.fatal('Schema is not valid');
+        }
+    }
 
     grunt.registerMultiTask('swagger_spec_generator', 'Swagger spec generator', function () {
         // Merge task-specific and/or target-specific options with these defaults.
         var options = this.options({
             space: 2,
             dest: 'spec.json',
+            validate: true
         });
-        grunt.log.debug('Options: %j', options);
         var out = {
             "swagger": "2.0",
             "info": {
@@ -85,7 +106,10 @@ module.exports = function (grunt) {
 
         var outString = JSON.stringify(out, undefined, options.space);
         saveFile(outString, options.dest);
-        grunt.log.debug('out: %j', options.dest);
+        grunt.log.debug('Saving schema to: %j', options.dest);
+
+        if (options.validate)
+            validateSchema(options.dest);
     });
 
 };

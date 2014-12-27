@@ -53,5 +53,5 @@ exports.swagger_spec_generator = {
     test.equal(actual, expected, 'should output swagger spec file with required external sections');
 
     test.done();
-  },
+  }
 };
