@@ -37,49 +37,141 @@ grunt.initConfig({
 
 ### Options
 
-#### options.separator
+#### options.dest
 Type: `String`
-Default value: `',  '`
+Default value: `'spec.json'`
 
-A string value that is used to do something with whatever.
+Target spec file.
 
-#### options.punctuation
-Type: `String`
-Default value: `'.'`
+#### options.paths
+Type: `String / Array`
+Default value: `null`
 
-A string value that is used to do something else with whatever else.
+File paths to files containing modules which will be included into `paths` section of the specification.
+For example: `paths: './test/fixtures/**/*Path.js'`
+
+#### options.definitions
+Type: `String / Array`
+Default value: `null`
+
+File paths to files containing modules which will be included into `definitions` section of the specification.
+For example: `definitions: './test/fixtures/**/*Def.js'
+
+#### options.override
+Type: `Object`
+Default value: `null`
+
+Any overrides which will be applied after importing sections from file.
+For example:
+
+```
+override: {
+    "host": "petstore.swagger.wordnik.com"
+}
+
+```
+
+Available sections to override:
+
+* info
+* host
+* basePath
+* schemes
+* paths
+* consumes
+* produces
+* definitions
+
+#### options.space
+Type: `Int`
+Default value: `2`
+
+Space for pretty format of generated file.
 
 ### Usage Examples
 
-#### Default Options
-In this example, the default options are used to do something with whatever. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result would be `Testing, 1 2 3.`
+Models are stored in files which ends with `Def`.
+Paths / operations are stored in files which ends with `Path`.
+
+`PetDef.js`
 
 ```js
-grunt.initConfig({
-  swagger_spec_generator: {
-    options: {},
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-});
+module.exports = {
+    "Pet": {
+        "required": [
+            "id",
+            "name"
+        ],
+        "properties": {
+            "id": {
+                "type": "integer",
+                "format": "int64"
+            },
+            "name": {
+                "type": "string"
+            },
+            "tag": {
+                "type": "string"
+            }
+        }
+    }
+}
 ```
 
-#### Custom Options
-In this example, custom options are used to do something else with whatever else. So if the `testing` file has the content `Testing` and the `123` file had the content `1 2 3`, the generated result in this case would be `Testing: 1 2 3 !!!`
+`PetPostPath.js`
 
 ```js
-grunt.initConfig({
-  swagger_spec_generator: {
-    options: {
-      separator: ': ',
-      punctuation: ' !!!',
-    },
-    files: {
-      'dest/default_options': ['src/testing', 'src/123'],
-    },
-  },
-});
+module.exports = {
+    "/pets": {
+        "post": {
+            "description": "Creates a new pet in the store.  Duplicates are allowed",
+            "operationId": "addPet",
+            "produces": [
+                "application/json"
+            ],
+            "parameters": [
+                {
+                    "name": "pet",
+                    "in": "body",
+                    "description": "Pet to add to the store",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/newPet"
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "pet response",
+                    "schema": {
+                        "$ref": "#/definitions/pet"
+                    }
+                },
+                "default": {
+                    "description": "unexpected error",
+                    "schema": {
+                        "$ref": "#/definitions/errorModel"
+                    }
+                }
+            }
+        }
+    }
+};
+```
+
+`Gruntfile.js`
+
+```js
+swagger_spec_generator: {
+    generate_schema: {
+        options: {
+            definitions: './src/models/**/*Def.js',
+            paths: './src/operations/**/*Path.js',
+            dest: './dist/swagger-spec.json'
+
+        }
+    }
+}
 ```
 
 ## Contributing

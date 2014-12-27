@@ -20,7 +20,6 @@ module.exports = function (grunt) {
     // creation: http://gruntjs.com/creating-tasks
 
     function saveFile(content, filePath) {
-        grunt.log.debug('Writing file to: %j', filePath);
         grunt.file.write(filePath, content);
     }
 
@@ -43,16 +42,9 @@ module.exports = function (grunt) {
 
     function importSection(section, out, definitionsPaths) {
         var sectionValue = {};
-        grunt.log.debug('Merge: ' + _.extend);
-//        grunt.log.debug('Importing %s from %j', section, definitionsPaths);
         var files = grunt.file.expand(definitionsPaths);
-//        grunt.log.debug('Files %j', files);
         files.forEach(function (elem) {
             var module = readModule(elem);
-            grunt.log.debug('Importing %s from file %j', section, elem);
-            grunt.log.debug('Module : %o', module);
-            grunt.log.debug('Section: %o', _);
-            
             sectionValue = _.merge(sectionValue, module);
         });
         out[section] = sectionValue;
@@ -61,9 +53,7 @@ module.exports = function (grunt) {
     function readModule(filePath) {
         var packageJsonPath = path.join(cwd, filePath);
         if (fs.existsSync(packageJsonPath)) {
-//            grunt.log.debug('Reading file: %j ', packageJsonPath);
             var packageData = require(packageJsonPath);
-//            grunt.log.debug('File read: %j ', packageData);
             return packageData;
         }
         return {};
@@ -72,8 +62,8 @@ module.exports = function (grunt) {
 
     grunt.registerMultiTask('swagger_spec_generator', 'Swagger spec generator', function () {
         // Merge task-specific and/or target-specific options with these defaults.
-        grunt.log.debug('This %o', this);
         var options = this.options({
+            space: 2,
             dest: 'spec.json',
         });
         grunt.log.debug('Options: %j', options);
@@ -93,11 +83,8 @@ module.exports = function (grunt) {
         if (options.paths)
             importSection('paths', out, options.paths);
 
-
-
-        var outString = JSON.stringify(out, undefined, 2);
+        var outString = JSON.stringify(out, undefined, options.space);
         saveFile(outString, options.dest);
-        grunt.log.debug('out: %j', outString);
         grunt.log.debug('out: %j', options.dest);
     });
 
